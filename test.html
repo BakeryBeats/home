@@ -1,1 +1,206 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BakeryBeats MVP Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        h1 {
+            color: #333;
+        }
+        .summary {
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>BakeryBeats MVP - Test Suite</h1>
+    <div id="testResults" class="test-results"></div>
+
+    <script src="app.js"></script>
+    <script>
+        const tests = [];
+        let passed = 0;
+        let failed = 0;
+
+        function test(name, fn) {
+            try {
+                fn();
+                tests.push({ name, status: 'pass', message: 'Test passed' });
+                passed++;
+            } catch (error) {
+                tests.push({ name, status: 'fail', message: error.message });
+                failed++;
+            }
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEqual(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected}, got ${actual}`);
+            }
+        }
+
+        function assertArrayLength(arr, length, message) {
+            if (arr.length !== length) {
+                throw new Error(message || `Expected array length ${length}, got ${arr.length}`);
+            }
+        }
+
+        // Run tests after DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait a bit for BakeryBeats to initialize
+            setTimeout(runTests, 100);
+        });
+
+        function runTests() {
+            // Test 1: BakeryBeats class exists
+            test('BakeryBeats class is instantiated', () => {
+                assert(window.bakeryBeats instanceof BakeryBeats, 'BakeryBeats should be instantiated');
+            });
+
+            // Test 2: Default tempo
+            test('Default tempo is 120 BPM', () => {
+                assertEqual(window.bakeryBeats.tempo, 120, 'Tempo should be 120');
+            });
+
+            // Test 3: Number of instruments
+            test('Has 5 instruments', () => {
+                assertArrayLength(window.bakeryBeats.instruments, 5, 'Should have 5 instruments');
+            });
+
+            // Test 4: Number of steps
+            test('Has 16 steps per instrument', () => {
+                assertEqual(window.bakeryBeats.numSteps, 16, 'Should have 16 steps');
+            });
+
+            // Test 5: Pattern initialization
+            test('Pattern is initialized as 5x16 grid of false values', () => {
+                assertArrayLength(window.bakeryBeats.pattern, 5, 'Pattern should have 5 rows');
+                window.bakeryBeats.pattern.forEach((row, i) => {
+                    assertArrayLength(row, 16, `Row ${i} should have 16 columns`);
+                    row.forEach((val, j) => {
+                        assertEqual(val, false, `Pattern[${i}][${j}] should be false`);
+                    });
+                });
+            });
+
+            // Test 6: Toggle step functionality
+            test('Toggle step changes pattern value', () => {
+                const initialValue = window.bakeryBeats.pattern[0][0];
+                window.bakeryBeats.toggleStep(0, 0);
+                assertEqual(window.bakeryBeats.pattern[0][0], !initialValue, 'Pattern value should toggle');
+                window.bakeryBeats.toggleStep(0, 0); // Toggle back
+            });
+
+            // Test 7: Clear pattern functionality
+            test('Clear pattern resets all values to false', () => {
+                window.bakeryBeats.toggleStep(0, 0);
+                window.bakeryBeats.toggleStep(1, 1);
+                window.bakeryBeats.clearPattern();
+                window.bakeryBeats.pattern.forEach((row) => {
+                    row.forEach((val) => {
+                        assertEqual(val, false, 'All pattern values should be false after clear');
+                    });
+                });
+            });
+
+            // Test 8: Play/Stop toggle
+            test('Toggle play changes isPlaying state', () => {
+                const initialState = window.bakeryBeats.isPlaying;
+                window.bakeryBeats.togglePlay();
+                assertEqual(window.bakeryBeats.isPlaying, !initialState, 'isPlaying should toggle');
+                window.bakeryBeats.togglePlay(); // Toggle back
+            });
+
+            // Test 9: Stop resets current step
+            test('Stop resets currentStep to 0', () => {
+                window.bakeryBeats.currentStep = 5;
+                window.bakeryBeats.stop();
+                assertEqual(window.bakeryBeats.currentStep, 0, 'currentStep should be 0 after stop');
+            });
+
+            // Test 10: Audio context creation
+            test('Audio context is created on first play', () => {
+                window.bakeryBeats.play();
+                assert(window.bakeryBeats.audioContext !== null, 'Audio context should be created');
+                window.bakeryBeats.stop();
+            });
+
+            // Test 11: Instruments have required properties
+            test('All instruments have name, emoji, frequency, and type', () => {
+                window.bakeryBeats.instruments.forEach((inst, i) => {
+                    assert(inst.name, `Instrument ${i} should have name`);
+                    assert(inst.emoji, `Instrument ${i} should have emoji`);
+                    assert(inst.frequency, `Instrument ${i} should have frequency`);
+                    assert(inst.type, `Instrument ${i} should have type`);
+                });
+            });
+
+            // Test 12: UI elements exist
+            test('Required UI elements are present', () => {
+                assert(document.getElementById('playBtn'), 'Play button should exist');
+                assert(document.getElementById('stopBtn'), 'Stop button should exist');
+                assert(document.getElementById('clearBtn'), 'Clear button should exist');
+                assert(document.getElementById('tempo'), 'Tempo slider should exist');
+                assert(document.getElementById('stepsGrid'), 'Steps grid should exist');
+            });
+
+            // Display results
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<h2>Test Results</h2>';
+
+            tests.forEach(test => {
+                html += `<div class="test-item ${test.status}">
+                    <strong>${test.status.toUpperCase()}</strong>: ${test.name}
+                    ${test.status === 'fail' ? `<br><small>${test.message}</small>` : ''}
+                </div>`;
+            });
+
+            const summaryClass = failed === 0 ? 'pass' : 'fail';
+            html += `<div class="summary ${summaryClass}">
+                Summary: ${passed} passed, ${failed} failed out of ${tests.length} tests
+            </div>`;
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
