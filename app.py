@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ HOMEPAGE FIX (Render 404 oplossen)
+# Homepage
 @app.get("/")
 def home():
     return FileResponse("index.html")
@@ -25,21 +25,26 @@ def home():
 def detect_bpm(file_path):
     print("Loading file:", file_path)
 
-    # stabiele audio load
-    y, sr = librosa.load(file_path, sr=None, mono=True)
+    try:
+        # 🔥 FIX: stabielere + snellere load op Render
+        y, sr = librosa.load(file_path, sr=22050, mono=True)
 
-    print("Audio loaded:", len(y), sr)
+        print("Audio loaded:", len(y), sr)
 
-    tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+        tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
 
-    print("Raw tempo:", tempo)
+        print("Raw tempo:", tempo)
 
-    bpm = float(tempo.item() if hasattr(tempo, "item") else tempo)
+        bpm = float(tempo.item() if hasattr(tempo, "item") else tempo)
 
-    if bpm < 90:
-        bpm *= 2
+        if bpm < 90:
+            bpm *= 2
 
-    return round(bpm)
+        return round(bpm)
+
+    except Exception as e:
+        print("BPM ERROR:", str(e))
+        return 0
 
 
 @app.post("/upload/")
@@ -62,8 +67,11 @@ async def upload(file: UploadFile = File(...)):
         }
 
     except Exception as e:
-        print("ERROR:", str(e))
-        return {"error": str(e)}
+        print("UPLOAD ERROR:", str(e))
+        return {
+            "error": str(e),
+            "bpm": 0
+        }
 
     finally:
         if os.path.exists(filepath):
