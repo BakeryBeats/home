@@ -4,3 +4,4 @@ gunicorn
 librosa
 soundfile
 numpy
+python-multipart
