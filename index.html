@@ -192,7 +192,7 @@ async function upload() {
     formData.append("file", file);
 
     try {
-        let response = await fetch("/upload/", {
+        let response = await  fetch(window.location.origin + "/upload/", {
             method: "POST",
             body: formData
         });
