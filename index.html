@@ -216,7 +216,7 @@ async function upload() {
     formData.append("file", file);
 
     try {
-        let response = await fetch("/upload/", {
+        let response = await fetch("https://home-70iz.onrender.com/upload/", {
             method: "POST",
             body: formData
         });
