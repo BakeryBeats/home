@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bakery Beats - BPM Detector</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at top, #1a1a1a, #0b0b0b);
+        color: white;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .card {
+        width: 380px;
+        background: #151515;
+        border-radius: 22px;
+        padding: 32px;
+        text-align: center;
+        border: 1px solid rgba(255, 170, 71, 0.25);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 26px;
+        color: #ffb347;
+        letter-spacing: 0.5px;
+    }
+
+    .sub {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #9a9a9a;
+    }
+
+    .spacer {
+        height: 22px;
+    }
+
+    input {
+        display: none;
+    }
+
+    .dropzone {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        border: 2px dashed rgba(255, 179, 71, 0.6);
+        border-radius: 16px;
+
+        padding: 28px;
+        cursor: pointer;
+
+        transition: 0.25s ease;
+        background: rgba(255,255,255,0.02);
+    }
+
+    .dropzone:hover {
+        background: rgba(255, 179, 71, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .dropzone.active {
+        background: rgba(255, 179, 71, 0.15);
+        border-color: #ffb347;
+    }
+
+    .filetext {
+        font-size: 13px;
+        color: #bdbdbd;
+        margin-top: 8px;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 18px;
+        padding: 13px;
+        border: none;
+        border-radius: 14px;
+        background: #ffb347;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    button:hover {
+        background: #ff9f1a;
+        transform: translateY(-1px);
+    }
+
+    button:disabled {
+        background: #444;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .loading {
+        margin-top: 14px;
+        font-size: 13px;
+        color: #aaa;
+        min-height: 18px;
+    }
+
+    .result {
+        margin-top: 18px;
+        font-size: 34px;
+        font-weight: bold;
+        color: #ffb347;
+        min-height: 40px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>Bakery Beats</h1>
+    <div class="sub">Upload your beat → detect BPM 🎧</div>
+
+    <div class="spacer"></div>
+
+    <label class="dropzone" id="dropzone">
+        <div>Drop your audio here</div>
+        <div class="filetext" id="filename">MP3 / WAV supported</div>
+        <input type="file" id="fileInput">
+    </label>
+
+    <button id="btn" onclick="upload()">Analyze BPM</button>
+
+    <div class="loading" id="loading"></div>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const dropzone = document.getElementById("dropzone");
+const filename = document.getElementById("filename");
+const btn = document.getElementById("btn");
+
+fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) {
+        filename.innerText = "Selected: " + fileInput.files[0].name;
+    }
+});
+
+dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("active");
+});
+
+dropzone.addEventListener("dragleave", () => {
+    dropzone.classList.remove("active");
+});
+
+dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("active");
+
+    fileInput.files = e.dataTransfer.files;
+
+    if (fileInput.files[0]) {
+        filename.innerText = "Selected: " + fileInput.files[0].name;
+    }
+});
+
+async function upload() {
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("Upload a file first");
+        return;
+    }
+
+    btn.disabled = true;
+    document.getElementById("loading").innerText = "Analyzing...";
+    document.getElementById("result").innerText = "";
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        let response = await fetch("http://127.0.0.1:8000/upload/", {
+            method: "POST",
+            body: formData
+        });
+
+        let data = await response.json();
+
+        document.getElementById("loading").innerText = "";
+
+        if (data.bpm) {
+            document.getElementById("result").innerText = data.bpm + " BPM";
+        } else {
+            document.getElementById("result").innerText = "Error";
+        }
+
+    } catch (err) {
+        document.getElementById("loading").innerText = "";
+        document.getElementById("result").innerText = "Server error";
+    }
+
+    btn.disabled = false;
+}
+</script>
+
+</body>
+</html>
