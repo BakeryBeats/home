@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import librosa
 import shutil
 import os
@@ -15,6 +16,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ✅ HOMEPAGE FIX (Render 404 oplossen)
+@app.get("/")
+def home():
+    return FileResponse("index.html")
+
+
 def detect_bpm(file_path):
     print("Loading file:", file_path)
 
@@ -23,18 +30,17 @@ def detect_bpm(file_path):
 
     print("Audio loaded:", len(y), sr)
 
-    # 🔥 FIX: tempo kan array zijn
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
 
     print("Raw tempo:", tempo)
 
-    # ✅ FIX HIER (belangrijk)
     bpm = float(tempo.item() if hasattr(tempo, "item") else tempo)
 
     if bpm < 90:
         bpm *= 2
 
     return round(bpm)
+
 
 @app.post("/upload/")
 async def upload(file: UploadFile = File(...)):
