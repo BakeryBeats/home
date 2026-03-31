@@ -5,9 +5,7 @@
 <title>Bakery Beats - BPM Detector</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
         margin: 0;
@@ -34,7 +32,6 @@
         margin: 0;
         font-size: 26px;
         color: #ffb347;
-        letter-spacing: 0.5px;
     }
 
     .sub {
@@ -43,44 +40,24 @@
         color: #9a9a9a;
     }
 
-    .spacer {
-        height: 22px;
-    }
+    .spacer { height: 22px; }
 
-    input {
-        display: none;
-    }
+    input { display: none; }
 
     .dropzone {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
         border: 2px dashed rgba(255, 179, 71, 0.6);
         border-radius: 16px;
-
         padding: 28px;
         cursor: pointer;
-
         transition: 0.25s ease;
-        background: rgba(255,255,255,0.02);
     }
 
     .dropzone:hover {
         background: rgba(255, 179, 71, 0.08);
-        transform: translateY(-2px);
     }
 
     .dropzone.active {
         background: rgba(255, 179, 71, 0.15);
-        border-color: #ffb347;
-    }
-
-    .filetext {
-        font-size: 13px;
-        color: #bdbdbd;
-        margin-top: 8px;
     }
 
     button {
@@ -90,28 +67,19 @@
         border: none;
         border-radius: 14px;
         background: #ffb347;
-        color: black;
         font-weight: bold;
         cursor: pointer;
-        transition: 0.2s ease;
-    }
-
-    button:hover {
-        background: #ff9f1a;
-        transform: translateY(-1px);
     }
 
     button:disabled {
         background: #444;
         cursor: not-allowed;
-        transform: none;
     }
 
     .loading {
         margin-top: 14px;
         font-size: 13px;
         color: #aaa;
-        min-height: 18px;
     }
 
     .result {
@@ -119,7 +87,24 @@
         font-size: 34px;
         font-weight: bold;
         color: #ffb347;
-        min-height: 40px;
+    }
+
+    /* 🔥 PROGRESS BAR */
+    .progress-container {
+        width: 100%;
+        height: 8px;
+        background: #333;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+        display: none;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #ffb347;
+        transition: width 0.3s ease;
     }
 </style>
 </head>
@@ -134,13 +119,19 @@
 
     <label class="dropzone" id="dropzone">
         <div>Drop your audio here</div>
-        <div class="filetext" id="filename">MP3 / WAV supported</div>
+        <div id="filename">MP3 / WAV supported</div>
         <input type="file" id="fileInput">
     </label>
 
     <button id="btn" onclick="upload()">Analyze BPM</button>
 
     <div class="loading" id="loading"></div>
+
+    <!-- 🔥 progress bar -->
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
     <div class="result" id="result"></div>
 </div>
 
@@ -184,36 +175,59 @@ async function upload() {
         return;
     }
 
+    const loading = document.getElementById("loading");
+    const result = document.getElementById("result");
+    const bar = document.getElementById("progressBar");
+    const container = document.getElementById("progressContainer");
+
     btn.disabled = true;
-    document.getElementById("loading").innerText = "Analyzing...";
-    document.getElementById("result").innerText = "";
+    loading.innerText = "Analyzing...";
+    result.innerText = "";
+
+    container.style.display = "block";
+    bar.style.width = "0%";
+
+    // 🔥 fake progress animation
+    let progress = 0;
+    let interval = setInterval(() => {
+        if (progress < 90) {
+            progress += Math.random() * 8;
+            bar.style.width = progress + "%";
+        }
+    }, 400);
 
     let formData = new FormData();
     formData.append("file", file);
 
     try {
-        let response = await  fetch("https://home-70iz.onrender.com/upload/", {
+        let response = await fetch("/upload/", {
             method: "POST",
             body: formData
         });
 
-        let text = await response.text();
-console.log("RAW RESPONSE:", text);
+        let data = await response.json();
 
-let data = JSON.parse(text);
+        clearInterval(interval);
+        bar.style.width = "100%";
 
-        document.getElementById("loading").innerText = "";
+        loading.innerText = "";
 
         if (data.bpm) {
-            document.getElementById("result").innerText = data.bpm + " BPM";
+            result.innerText = data.bpm + " BPM";
         } else {
-            document.getElementById("result").innerText = "Error";
+            result.innerText = "Error";
         }
 
     } catch (err) {
-        document.getElementById("loading").innerText = "";
-        document.getElementById("result").innerText = "Server error";
+        clearInterval(interval);
+        loading.innerText = "";
+        result.innerText = "Server error";
     }
+
+    setTimeout(() => {
+        container.style.display = "none";
+        bar.style.width = "0%";
+    }, 800);
 
     btn.disabled = false;
 }
