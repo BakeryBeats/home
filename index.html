@@ -130,7 +130,7 @@ button:disabled {
 <body>
 
 <div class="card">
-    <h1>Bakery Bots</h1>
+    <h1>Bakery Beats</h1>
     <div class="sub">Upload your beat → detect BPM 🎧</div>
 
     <div class="section">
@@ -216,7 +216,7 @@ async function upload() {
     formData.append("file", file);
 
     try {
-        let response = await fetch("https://home-70iz.onrender.com/upload/", {
+        let response = await fetch("/upload/", {
             method: "POST",
             body: formData
         });
