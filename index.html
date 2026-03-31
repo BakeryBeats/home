@@ -69,6 +69,11 @@
         background: #ffb347;
         font-weight: bold;
         cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #ff9f1a;
     }
 
     button:disabled {
@@ -80,6 +85,7 @@
         margin-top: 14px;
         font-size: 13px;
         color: #aaa;
+        min-height: 18px;
     }
 
     .result {
@@ -87,24 +93,32 @@
         font-size: 34px;
         font-weight: bold;
         color: #ffb347;
+        min-height: 40px;
     }
 
-    /* 🔥 PROGRESS BAR */
+    /* 🔥 MODERNE LOADER */
     .progress-container {
         width: 100%;
-        height: 8px;
-        background: #333;
-        border-radius: 10px;
+        height: 6px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 20px;
         overflow: hidden;
-        margin-top: 10px;
+        margin-top: 14px;
         display: none;
     }
 
     .progress-bar {
         height: 100%;
-        width: 0%;
-        background: #ffb347;
-        transition: width 0.3s ease;
+        width: 30%;
+        background: linear-gradient(90deg, #ffb347, #ff9f1a);
+        border-radius: 20px;
+        animation: loadingMove 1.2s infinite ease-in-out;
+    }
+
+    @keyframes loadingMove {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+        100% { transform: translateX(100%); }
     }
 </style>
 </head>
@@ -127,9 +141,9 @@
 
     <div class="loading" id="loading"></div>
 
-    <!-- 🔥 progress bar -->
+    <!-- loader -->
     <div class="progress-container" id="progressContainer">
-        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-bar"></div>
     </div>
 
     <div class="result" id="result"></div>
@@ -177,38 +191,27 @@ async function upload() {
 
     const loading = document.getElementById("loading");
     const result = document.getElementById("result");
-    const bar = document.getElementById("progressBar");
     const container = document.getElementById("progressContainer");
 
     btn.disabled = true;
-    loading.innerText = "Analyzing...";
+    loading.innerText = "Analyzing audio...";
     result.innerText = "";
 
     container.style.display = "block";
-    bar.style.width = "0%";
-
-    // 🔥 fake progress animation
-    let progress = 0;
-    let interval = setInterval(() => {
-        if (progress < 90) {
-            progress += Math.random() * 8;
-            bar.style.width = progress + "%";
-        }
-    }, 400);
 
     let formData = new FormData();
     formData.append("file", file);
 
     try {
-        let response = await fetch("https://home-70iz.onrender.com/upload/", {
+        // 🔥 zorgt dat loader meteen zichtbaar is
+        await new Promise(r => setTimeout(r, 50));
+
+        let response = await fetch("/upload/", {
             method: "POST",
             body: formData
         });
 
         let data = await response.json();
-
-        clearInterval(interval);
-        bar.style.width = "100%";
 
         loading.innerText = "";
 
@@ -219,16 +222,11 @@ async function upload() {
         }
 
     } catch (err) {
-        clearInterval(interval);
         loading.innerText = "";
         result.innerText = "Server error";
     }
 
-    setTimeout(() => {
-        container.style.display = "none";
-        bar.style.width = "0%";
-    }, 800);
-
+    container.style.display = "none";
     btn.disabled = false;
 }
 </script>
