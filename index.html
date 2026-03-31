@@ -22,10 +22,14 @@
         width: 380px;
         background: #151515;
         border-radius: 22px;
-        padding: 32px;
+        padding: 36px;
         text-align: center;
         border: 1px solid rgba(255, 170, 71, 0.25);
         box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+
+        display: flex;
+        flex-direction: column;
+        gap: 18px; /* 🔥 spacing fix */
     }
 
     h1 {
@@ -35,21 +39,21 @@
     }
 
     .sub {
-        margin-top: 6px;
         font-size: 13px;
         color: #9a9a9a;
     }
-
-    .spacer { height: 22px; }
 
     input { display: none; }
 
     .dropzone {
         border: 2px dashed rgba(255, 179, 71, 0.6);
         border-radius: 16px;
-        padding: 28px;
+        padding: 34px 20px;
         cursor: pointer;
         transition: 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .dropzone:hover {
@@ -60,50 +64,55 @@
         background: rgba(255, 179, 71, 0.15);
     }
 
+    #filename {
+        font-size: 13px;
+        color: #bdbdbd;
+    }
+
     button {
         width: 100%;
-        margin-top: 18px;
-        padding: 13px;
+        padding: 14px;
         border: none;
         border-radius: 14px;
         background: #ffb347;
         font-weight: bold;
         cursor: pointer;
         transition: 0.2s;
+        margin-top: 4px; /* extra ruimte */
     }
 
     button:hover {
         background: #ff9f1a;
+        transform: translateY(-1px);
     }
 
     button:disabled {
         background: #444;
         cursor: not-allowed;
+        transform: none;
     }
 
     .loading {
-        margin-top: 14px;
         font-size: 13px;
         color: #aaa;
         min-height: 18px;
     }
 
     .result {
-        margin-top: 18px;
-        font-size: 34px;
+        font-size: 38px;
         font-weight: bold;
         color: #ffb347;
-        min-height: 40px;
+        min-height: 50px;
+        margin-top: 6px;
     }
 
-    /* 🔥 MODERNE LOADER */
+    /* 🔥 LOADER */
     .progress-container {
         width: 100%;
         height: 6px;
         background: rgba(255,255,255,0.08);
         border-radius: 20px;
         overflow: hidden;
-        margin-top: 14px;
         display: none;
     }
 
@@ -129,8 +138,6 @@
     <h1>Bakery Beats</h1>
     <div class="sub">Upload your beat → detect BPM 🎧</div>
 
-    <div class="spacer"></div>
-
     <label class="dropzone" id="dropzone">
         <div>Drop your audio here</div>
         <div id="filename">MP3 / WAV supported</div>
@@ -141,7 +148,6 @@
 
     <div class="loading" id="loading"></div>
 
-    <!-- loader -->
     <div class="progress-container" id="progressContainer">
         <div class="progress-bar"></div>
     </div>
@@ -203,7 +209,6 @@ async function upload() {
     formData.append("file", file);
 
     try {
-        // 🔥 zorgt dat loader meteen zichtbaar is
         await new Promise(r => setTimeout(r, 50));
 
         let response = await fetch("/upload/", {
