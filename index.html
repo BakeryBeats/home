@@ -192,7 +192,7 @@ async function upload() {
     formData.append("file", file);
 
     try {
-        let response = await fetch("http://127.0.0.1:8000/upload/", {
+        let response = await fetch("/upload/", {
             method: "POST",
             body: formData
         });
