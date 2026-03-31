@@ -197,7 +197,10 @@ async function upload() {
             body: formData
         });
 
-        let data = await response.json();
+        let text = await response.text();
+console.log("RAW RESPONSE:", text);
+
+let data = JSON.parse(text);
 
         document.getElementById("loading").innerText = "";
 
