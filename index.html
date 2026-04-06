@@ -48,12 +48,33 @@ h1 {
 input { display: none; }
 
 .dropzone {
-    border: 2px dashed rgba(255, 179, 71, 0.6);
+    position: relative;
     border-radius: 16px;
     padding: 35px;
     cursor: pointer;
     transition: 0.25s ease;
     background: rgba(255,255,255,0.02);
+}
+
+/* 🔥 custom dashed border */
+.dropzone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(255,179,71,0.7) 0px,
+        rgba(255,179,71,0.7) 8px,
+        transparent 8px,
+        transparent 14px
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
 }
 
 .dropzone:hover {
