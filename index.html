@@ -48,44 +48,31 @@ h1 {
 input { display: none; }
 
 .dropzone {
-    position: relative;
-    border-radius: 16px;
-    padding: 35px;
+    border: 2px solid rgba(255, 179, 71, 0.4);
+    border-radius: 18px;
+    padding: 45px 20px;
     cursor: pointer;
-    transition: 0.25s ease;
+    transition: all 0.25s ease;
     background: rgba(255,255,255,0.02);
-}
 
-/* 🔥 custom dashed border */
-.dropzone::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    padding: 2px;
-    background: repeating-linear-gradient(
-        90deg,
-        rgba(255,179,71,0.7) 0px,
-        rgba(255,179,71,0.7) 8px,
-        transparent 8px,
-        transparent 14px
-    );
-    -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .dropzone:hover {
     background: rgba(255, 179, 71, 0.08);
+    border-color: #ffb347;
+    box-shadow: 0 0 20px rgba(255, 179, 71, 0.25);
     transform: translateY(-2px);
 }
 
 .dropzone.active {
     background: rgba(255, 179, 71, 0.15);
+    border-color: #ffb347;
 }
-
+    
 .filetext {
     margin-top: 10px;
     font-size: 13px;
