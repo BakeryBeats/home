@@ -142,11 +142,17 @@ button:disabled {
     <div class="sub">Upload your beat → detect BPM 🎧</div>
 
     <div class="section">
-        <label class="dropzone" id="dropzone">
-            <div>Drop your audio here</div>
-            <div class="filetext" id="filename">MP3 / WAV supported</div>
-            <input type="file" id="fileInput">
-        </label>
+      <label class="dropzone" id="dropzone">
+    <div style="font-size:16px; font-weight:500;">
+        Drop your audio here
+    </div>
+
+    <div class="filetext" id="filename" style="margin-top:12px;">
+        MP3 / WAV supported
+    </div>
+
+    <input type="file" id="fileInput">
+</label>
     </div>
 
     <button id="btn" onclick="upload()">Analyze BPM</button>
